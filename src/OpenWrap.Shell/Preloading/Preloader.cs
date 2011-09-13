@@ -168,8 +168,9 @@ namespace OpenWrap.Preloading
                 throw new InvalidOperationException("Cache directory does not exist");
             return (
                            from package in packageNames
-                           from packageDirectory in cacheDirectory.GetDirectories(package + "-*")
-                           where packageDirectory.Exists
+                           from packageDirectory in cacheDirectory.GetDirectories()
+    					   let directoryMatch = Regex.Match(packageDirectory.Name, @"(?<name>\S+)-(?<version>[\d\.]+)", RegexOptions.IgnoreCase)
+						   where packageDirectory.Exists && directoryMatch.Success && StringComparer.OrdinalIgnoreCase.Equals(directoryMatch.Groups["name"].Value, package)
                            let packageFile = cacheDirectory.Parent.GetFiles(packageDirectory.Name + ".wrap").FirstOrDefault()
                            where packageFile != null
                            let wrapDescriptor = packageDirectory.GetFiles("*.wrapdesc").OrderBy(x => x.Name.Length).FirstOrDefault()
